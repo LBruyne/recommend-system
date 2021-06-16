@@ -3,6 +3,9 @@ package com.hinsliu.dianping.controller.admin;
 import com.hinsliu.dianping.common.AdminPermission;
 import com.hinsliu.dianping.common.BusinessException;
 import com.hinsliu.dianping.common.EmBusinessError;
+import com.hinsliu.dianping.service.CategoryService;
+import com.hinsliu.dianping.service.SellerService;
+import com.hinsliu.dianping.service.ShopService;
 import com.hinsliu.dianping.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,44 +42,57 @@ public class AdminController {
     @Resource
     private HttpServletRequest httpServletRequest;
 
-    @Resource
+    @Autowired
     private UserService userService;
+
+    @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private ShopService shopService;
+
+    @Autowired
+    private SellerService sellerService;
+
 
     public static final String CURRENT_ADMIN_SESSION = "currentAdminSession";
 
     @RequestMapping("/index")
     @AdminPermission
-    public ModelAndView index() {
+    public ModelAndView index(){
         ModelAndView modelAndView = new ModelAndView("/admin/admin/index");
 
-        modelAndView.addObject("userCount", userService.countAllUser());
-        modelAndView.addObject("CONTROLLER_NAME", "admin");
-        modelAndView.addObject("ACTION_NAME", "index");
+        modelAndView.addObject("userCount",userService.countAllUser());
+        modelAndView.addObject("shopCount",shopService.countAllShop());
+        modelAndView.addObject("categoryCount",categoryService.countAllCategory());
+        modelAndView.addObject("sellerCount",sellerService.countAllSeller());
+        modelAndView.addObject("CONTROLLER_NAME","admin");
+        modelAndView.addObject("ACTION_NAME","index");
         return modelAndView;
     }
 
+
     @RequestMapping("/loginpage")
-    public ModelAndView loginpage() {
+    public ModelAndView loginpage(){
         ModelAndView modelAndView = new ModelAndView("/admin/admin/login");
         return modelAndView;
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public String login(@RequestParam(name = "email") String email,
-                        @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+    @RequestMapping(value = "/login",method = RequestMethod.POST)
+    public String login(@RequestParam(name="email")String email,
+                        @RequestParam(name="password")String password ) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
         if (StringUtils.isEmpty(email) || StringUtils.isEmpty(password)) {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "用户名密码不能为空");
         }
-        if (email.equals(this.email) && encodeByMd5(password).equals(this.encrptyPassord)) {
+        if(email.equals(this.email) && encodeByMd5(password).equals(this.encrptyPassord)){
             //登录成功
-            httpServletRequest.getSession().setAttribute(CURRENT_ADMIN_SESSION, email);
+            httpServletRequest.getSession().setAttribute(CURRENT_ADMIN_SESSION,email);
             return "redirect:/admin/admin/index";
-        } else {
-            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "用户名密码错误");
+        }else{
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR,"用户名密码错误");
         }
 
     }
-
     private String encodeByMd5(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         //确认计算方法MD5
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
