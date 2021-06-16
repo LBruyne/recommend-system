@@ -5,6 +5,7 @@ import com.hinsliu.dianping.common.EmBusinessError;
 import com.hinsliu.dianping.dal.UserModelMapper;
 import com.hinsliu.dianping.model.UserModel;
 import com.hinsliu.dianping.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ import java.util.Date;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Resource
+    @Autowired
     private UserModelMapper userModelMapper;
 
     @Override

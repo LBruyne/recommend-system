@@ -11,6 +11,7 @@ import lombok.Data;
  */
 @Data
 public class ShopModel implements Serializable {
+
     private Integer id;
 
     private Date createdAt;
@@ -41,5 +42,12 @@ public class ShopModel implements Serializable {
 
     private String iconUrl;
 
+    private CategoryModel categoryModel;
+
+    private SellerModel sellerModel;
+
+    private Integer distance;
+
     private static final long serialVersionUID = 1L;
+
 }

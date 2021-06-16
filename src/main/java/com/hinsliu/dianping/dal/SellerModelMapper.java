@@ -1,9 +1,11 @@
 package com.hinsliu.dianping.dal;
 
 import com.hinsliu.dianping.model.SellerModel;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface SellerModelMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -18,4 +20,6 @@ public interface SellerModelMapper {
     int updateByPrimaryKey(SellerModel record);
 
     List<SellerModel> selectAll();
+
+    Integer countAllSeller();
 }

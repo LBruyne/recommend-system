@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -54,6 +55,11 @@ public class SellerServiceImpl implements SellerService {
         sellerModel.setDisabledFlag(disabledFlag);
         sellerModelMapper.updateByPrimaryKeySelective(sellerModel);
         return sellerModel;
+    }
+
+    @Override
+    public Integer countAllSeller() {
+        return sellerModelMapper.countAllSeller();
     }
 
 }
