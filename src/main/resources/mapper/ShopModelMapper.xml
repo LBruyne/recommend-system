@@ -23,7 +23,7 @@
         id
         , created_at, updated_at, name, remark_score, price_per_man, latitude, longitude,
     category_id, tags, start_time, end_time, address, seller_id, icon_url
-    </sql>
+       </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

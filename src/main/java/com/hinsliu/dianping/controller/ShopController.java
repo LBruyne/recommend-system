@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -51,18 +52,19 @@ public class ShopController {
                             @RequestParam(name = "keyword") String keyword,
                             @RequestParam(name = "orderby", required = false) Integer orderby,
                             @RequestParam(name = "categoryId", required = false) Integer categoryId,
-                            @RequestParam(name = "tags", required = false) String tags) throws BusinessException {
-        if (StringUtils.isEmpty(keyword) || longitude == null || latitude == null) {
+                            @RequestParam(name = "tags", required = false) String tags) throws BusinessException, IOException {
+        if(StringUtils.isEmpty(keyword) || longitude == null || latitude == null){
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
         }
 
-        List<ShopModel> shopModelList = shopService.search(longitude, latitude, keyword, orderby, categoryId, tags);
+        Map<String,Object> result = shopService.searchES(longitude,latitude,keyword,orderby,categoryId,tags);
+        List<ShopModel> shopModelList = (List<ShopModel>) result.get("shop");
         List<CategoryModel> categoryModelList = categoryService.selectAll();
-        List<Map<String, Object>> tagsAggregation = shopService.searchGroupByTags(keyword, categoryId, tags);
-        Map<String, Object> resMap = new HashMap<>();
-        resMap.put("shop", shopModelList);
-        resMap.put("category", categoryModelList);
-        resMap.put("tags", tagsAggregation);
+        List<Map<String,Object>>  tagsAggregation = (List<Map<String, Object>>) result.get("tags");
+        Map<String,Object> resMap = new HashMap<>();
+        resMap.put("shop",shopModelList);
+        resMap.put("category",categoryModelList);
+        resMap.put("tags",tagsAggregation);
         return CommonRes.create(resMap);
     }
 }
