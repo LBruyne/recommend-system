@@ -23,8 +23,8 @@ public class RecommendService{
         }
         String[] shopIdArr = recommendDO.getRecommend().split(",");
         List<Integer> shopIdList = new ArrayList<>();
-        for(int i = 0; i < shopIdArr.length; i++) {
-            shopIdList.add(Integer.valueOf(shopIdArr[i]));
+        for (String s : shopIdArr) {
+            shopIdList.add(Integer.valueOf(s));
         }
         return shopIdList;
     }

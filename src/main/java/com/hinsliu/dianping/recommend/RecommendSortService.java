@@ -22,7 +22,7 @@ public class RecommendSortService {
     public void init(){
         // 加载LR模型
         spark = SparkSession.builder().master("local").appName("DianpingApp").getOrCreate();
-        lrModel = LogisticRegressionModel.load("file:///Users/bytedance/Developer/java/recommend-system/src/main/resources/data/lrmode");
+        lrModel = LogisticRegressionModel.load("file:///Users/bytedance/Developer/java/recommend-system/src/main/resources/data/lrmodel");
     }
 
     public List<Integer> sort(List<Integer> shopIdList, Integer userId){

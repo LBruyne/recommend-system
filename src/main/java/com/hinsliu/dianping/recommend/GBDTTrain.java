@@ -2,8 +2,8 @@ package com.hinsliu.dianping.recommend;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.ml.classification.LogisticRegression;
-import org.apache.spark.ml.classification.LogisticRegressionModel;
+import org.apache.spark.ml.classification.GBTClassificationModel;
+import org.apache.spark.ml.classification.GBTClassifier;
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
 import org.apache.spark.ml.linalg.VectorUDT;
 import org.apache.spark.ml.linalg.Vectors;
@@ -18,17 +18,16 @@ import org.apache.spark.sql.types.StructType;
 
 import java.io.IOException;
 
-public class LRTrain {
+public class GBDTTrain {
 
     public static void main(String[] args) throws IOException {
         // 初始化spark运行环境
-        SparkSession spark = SparkSession.builder().master("local").appName("DianpingApp").getOrCreate();
+        SparkSession sparkSession = SparkSession.builder().master("local").appName("DianpingApplication").getOrCreate();
 
-        // 加载特征及label训练文件，特征分为离散特征和连续特征，完整的特征在featurevalue.csv中
-        // feature.csv中为处理过后的特征向量
-        JavaRDD<String> csvFile = spark.read().textFile("file:///Users/bytedance/Developer/java/recommend-system/src/main/resources/data/feature.csv").toJavaRDD();
+        // 加载特征以及label训练文件
+        JavaRDD<String> csvFile = sparkSession.read().textFile("file:///Users/bytedance/Developer/java/recommend-system/src/main/resources/data/feature.csv").toJavaRDD();
 
-        // 做转化
+        //做特征转化
         JavaRDD<Row> rowJavaRDD = csvFile.map((Function<String, Row>) v1 -> {
             v1 = v1.replace("\"", "");
             String[] strArr = v1.split(",");
@@ -39,33 +38,27 @@ public class LRTrain {
         StructType schema = new StructType(
                 new StructField[]{
                         new StructField("label", DataTypes.DoubleType, false, Metadata.empty()),
-                        new StructField("features", new VectorUDT(), false, Metadata.empty())
+                        new StructField("features", new VectorUDT(), false, Metadata.empty()),
                 }
         );
+        Dataset<Row> data = sparkSession.createDataFrame(rowJavaRDD, schema);
 
-        Dataset<Row> data = spark.createDataFrame(rowJavaRDD, schema);
-
-        // 分开训练和测试集
+        // 分开训练和测试数据集
         Dataset<Row>[] dataArr = data.randomSplit(new double[]{0.8, 0.2});
         Dataset<Row> trainData = dataArr[0];
         Dataset<Row> testData = dataArr[1];
 
-        LogisticRegression lr = new LogisticRegression()
-                .setMaxIter(10)
-                .setRegParam(0.3)
-                .setElasticNetParam(0.8)
-                .setFamily("multinomial");
+        GBTClassifier classifier = new GBTClassifier().setLabelCol("label").setFeaturesCol("features").setMaxIter(10);
+        GBTClassificationModel gbtClassificationModel = classifier.train(trainData);
 
-        LogisticRegressionModel lrModel = lr.fit(trainData);
-
-        lrModel.save("file:///Users/bytedance/Developer/java/recommend-system/src/main/resources/data/lrmodel");
+        gbtClassificationModel.save("file:///Users/bytedance/Developer/java/recommend-system/src/main/resources/data/gbdtmodel");
 
         // 测试评估
-        Dataset<Row> predictions = lrModel.transform(testData);
+        Dataset<Row> predications = gbtClassificationModel.transform(testData);
 
-        // 评价指标
         MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator();
-        double accuracy = evaluator.setMetricName("accuracy").evaluate(predictions);
-        System.out.println("auc=" + accuracy);
+        double accuracy = evaluator.setMetricName("accuracy").evaluate(predications);
+        System.out.println("accuracy=" + accuracy);
     }
 }
+

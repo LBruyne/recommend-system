@@ -51,6 +51,8 @@
 
 - resource目录下的data中包含了已经训练成功的lrmode和alsmode，以及用于训练的假数据
 
+- 补充了Spark中MLlib实现的GBDT算法进行排序：[GBDT算法](https://zhuanlan.zhihu.com/p/52893677)
+
 ## 搜索系统
 
 ### V2.0
